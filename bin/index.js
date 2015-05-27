@@ -13,8 +13,8 @@ function loadConfig(path) {
 	var config = require(path);
 	
 	for(var property in config.hosts) {
-		if(config.hasOwnProperty(property)) {
-			config[property] = resolveConfigAlias(config, config[property]);
+		if(config.hosts.hasOwnProperty(property)) {
+			config.hosts[property] = resolveConfigAlias(config.hosts, config.hosts[property]);
 		}
 	}
 	
