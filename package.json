@@ -1,0 +1,29 @@
+{
+  "name": "",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/index.js",
+  "": "bin/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "minimist": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": ""
+  },
+  "keywords": [],
+  "contributors": [
+    {
+      "name": "Bryan Way",
+      "email": "bryanwayb@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "license": "MIT"
+}
