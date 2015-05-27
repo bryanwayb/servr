@@ -1,6 +1,15 @@
 {
 	"hosts": {
-		"*:80" : { },
+		"*:80" : {
+			"protocol": "http",
+			"directories": {
+				"/": {
+					"root": "../www/",
+					"options": "*",
+					"default": [ "index.html", "default.html" ]
+				}
+			}
+		},
 		"*:8080": "*:80"
 	}
 }

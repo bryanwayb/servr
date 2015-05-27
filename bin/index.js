@@ -1,5 +1,5 @@
 var arguments = require('minimist')(process.argv.slice(2)),
-	server = require('../lib/index.js'),
+	nodelite = require('../lib/index.js'),
 	library = require('../lib/functions.js');
 
 function resolveConfigAlias(config, entry) {
@@ -55,4 +55,6 @@ else {
 	config = defaultConfiguration;
 }
 
-console.log(config);
+library.makeInfo('Starting...');
+nodelite.ServerPool(config).start();
+library.makeInfo('Server has been started');
