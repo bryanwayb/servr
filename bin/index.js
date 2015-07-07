@@ -1,6 +1,7 @@
-var arguments = require('minimist')(process.argv.slice(2)),
-	nodelite = require('../lib/index.js'),
+var nodelite = require('../lib/index.js'),
 	library = require('../lib/functions.js');
+
+var args = require('minimist')(process.argv.slice(2));
 
 function resolveConfigAlias(config, entry) {
 	if(typeof entry === 'string') {
@@ -31,7 +32,7 @@ catch(e) {
 	defaultConfiguration = { };
 }
 
-var externalConfigurations = library.buildFlatArray([ arguments.c, arguments.config ]);
+var externalConfigurations = library.buildFlatArray([ args.c, args.config ]);
 var config = undefined;
 for(var i = 0; i < externalConfigurations.length; i++) {
 	try {
