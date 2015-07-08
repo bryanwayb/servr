@@ -10,20 +10,6 @@
 				}
 			}
 		},
-		"*:8080": "*:80",
-		"*:81" : {
-			"protocol": "http",
-			"subhosts": {
-				"localhost": {
-					"directories": {
-						"/": {
-							"root": "../www/",
-							"options": "*",
-							"default": [ "index.html", "default.html" ]
-						}
-					}
-				}
-			}
-		}
+		"*:8080": "*:80"
 	}
 }
