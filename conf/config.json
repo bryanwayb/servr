@@ -7,6 +7,11 @@
 					"root": "../www/",
 					"options": "*",
 					"default": [ "index.html", "default.html" ]
+				},
+				"/virtual/": {
+					"root": "../www/submap",
+					"options": "*",
+					"default": [ "index.html", "default.html" ]
 				}
 			}
 		},
