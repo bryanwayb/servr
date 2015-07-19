@@ -8,7 +8,7 @@
 					"options": "*",
 					"default": [ "index.html", "default.html" ]
 				},
-				"/virtual/": {
+				"/virtual": {
 					"root": "../www/submap",
 					"options": "*",
 					"default": [ "index.html", "default.html" ]
