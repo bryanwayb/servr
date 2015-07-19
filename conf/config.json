@@ -6,7 +6,7 @@
 				"/": {
 					"root": "../www/",
 					"options": "*",
-					"default": [ "index.html", "default.html" ]
+					"default": [ "index.jshtml", "index.html", "default.html" ]
 				}
 			}
 		},
