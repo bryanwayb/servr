@@ -44,6 +44,7 @@ if(cluster.isMaster && clustered) {
 	
 	cluster.on('exit', function(worker, code, signal) {
 		if(code > 0) { // Restart the worker on an error
+			library.makeWarning('Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
 			cluster.fork();
 		}
 	});
