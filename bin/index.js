@@ -36,13 +36,13 @@ function resolveConfigAlias(config, entry) {
 
 function loadConfig(path) {
     var config = require(path);
-    
+
     for(var property in config.hosts) {
         if(config.hosts.hasOwnProperty(property)) {
             config.hosts[property] = resolveConfigAlias(config.hosts, config.hosts[property]);
         }
     }
-    
+
     return config;
 }
 
@@ -56,21 +56,21 @@ if(cluster.isMaster && clustered) {
     var numberOfWorkers = instances || require('os').cpus().length;
     var workersOnline = 0;
     var stopFork = false;
-    
+
     cluster.on('online', function() {
         if(++workersOnline === numberOfWorkers) {
             library.makeInfo('All workers are now online');
         }
     });
-    
+
     cluster.on('exit', function(worker, code) {
         if(code > 0) { // Restart the worker on an error
             library.makeWarning('Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
             cluster.fork();
         }
     });
-    
-    for (var i = 0; i < numberOfWorkers && !stopFork; i++) {
+
+    for(var i = 0; i < numberOfWorkers && !stopFork; i++) {
         var env = {};
         env[library.outputEnabledEnvironmentVariable] = i === 0;
         cluster.fork(env);
@@ -78,7 +78,7 @@ if(cluster.isMaster && clustered) {
 }
 else {
     var nodelite = require('../lib/index.js');
-    
+
     // Try to load the default configuration file. If we're not able to for some reason, continue on with a warning.
     var defaultConfiguration;
     if(args.default !== false) {
@@ -90,7 +90,7 @@ else {
             defaultConfiguration = { };
         }
     }
-    
+
     var externalConfigurations = library.buildFlatArray([ args.c, args.config ]);
     var config;
     for(var i = 0; i < externalConfigurations.length; i++) {
@@ -106,7 +106,7 @@ else {
             library.makeError('Unable to load configuration file: \'' + externalConfigurations[i] + '\'', 1);
         }
     }
-    
+
     if(config !== undefined) {
         library.mergeObjects(config, defaultConfiguration);
     }
@@ -117,7 +117,7 @@ else {
     else {
         library.makeError('No configuration file has been loaded.', 1);
     }
-    
+
     library.makeInfo('Starting...');
     nodelite.ServerPool(config).start();
     library.makeInfo('Server has been started');
