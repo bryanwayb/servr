@@ -11,11 +11,9 @@
     "js-html": "^0.2.2",
     "minimist": "^1.1.1"
   },
-  "devDependencies": {
-    "v8-profiler": "^5.2.9"
-  },
   "scripts": {
-    "test": ""
+    "start": "node ./bin/index.js -l",
+    "test": "node ./test/jshint.js"
   },
   "keywords": [],
   "contributors": [
@@ -28,5 +26,9 @@
     "type": "git",
     "url": ""
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "colors": "^1.1.2",
+    "jshint": "^2.8.0"
+  }
 }

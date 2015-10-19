@@ -1,9 +1,9 @@
 <html>
-	<head>
-		<title>Index Page Example</title>
-	</head>
-	<body>
-		If you're seeing this, congrats! That means it works.
-		<?js console.log('Also, hello from JavaScript'); ?>
-	</body>
+    <head>
+        <title>Index Page Example</title>
+    </head>
+    <body>
+        If you're seeing this, congrats! That means it works.
+        <?js console.log('Also, hello from JavaScript'); ?>
+    </body>
 </html>
