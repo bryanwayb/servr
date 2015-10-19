@@ -12,6 +12,9 @@ var totalErrorsInFiles = 0;
 var totalFixableErrorsInFiles = 0;
 var returnCode = 0;
 
+var jshintConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../.jshintrc')).toString());
+var jscsConfig = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../.jscsrc')).toString());
+
 function recursiveCheckDirectory(dir) {
     var dirList = fs.readdirSync(dir);
     for(var i in dirList) {
@@ -24,12 +27,12 @@ function recursiveCheckDirectory(dir) {
                 var fileContents = fs.readFileSync(pathname).toString();
                 var totalErrors = 0;
 
-                jshint(fileContents, require('./jshint.json'));
+                jshint(fileContents, jshintConfig);
                 totalErrors += jshint.errors.length;
 
                 var jscsChecker = new JSCS();
                 jscsChecker.registerDefaultRules();
-                jscsChecker.configure(require('./jscs.json'));
+                jscsChecker.configure(jscsConfig);
                 var jscsErrors = jscsChecker.checkString(fileContents).getErrorList();
                 totalErrors += jscsErrors.length;
 
