@@ -27,6 +27,25 @@ if(args.h || args.help) {
     process.exit();
 }
 
+function resolveConfigAlias(config, entry) {
+    if(typeof entry === 'string') {
+        entry = resolveConfigAlias(config, config[entry]);
+    }
+    return entry;
+}
+
+function loadConfig(path) {
+    var config = require(path);
+    
+    for(var property in config.hosts) {
+        if(config.hosts.hasOwnProperty(property)) {
+            config.hosts[property] = resolveConfigAlias(config.hosts, config.hosts[property]);
+        }
+    }
+    
+    return config;
+}
+
 var instances = args.instances;
 if(isNaN(instances)) {
     instances = undefined;
@@ -56,28 +75,9 @@ if(cluster.isMaster && clustered) {
         env[library.outputEnabledEnvironmentVariable] = i === 0;
         cluster.fork(env);
     }
-} 
+}
 else {
     var nodelite = require('../lib/index.js');
-    
-    function resolveConfigAlias(config, entry) {
-        if(typeof entry === 'string') {
-            entry = resolveConfigAlias(config, config[entry]);
-        }
-        return entry;
-    }
-    
-    function loadConfig(path) {
-        var config = require(path);
-        
-        for(var property in config.hosts) {
-            if(config.hosts.hasOwnProperty(property)) {
-                config.hosts[property] = resolveConfigAlias(config.hosts, config.hosts[property]);
-            }
-        }
-        
-        return config;
-    }
     
     // Try to load the default configuration file. If we're not able to for some reason, continue on with a warning.
     var defaultConfiguration;
