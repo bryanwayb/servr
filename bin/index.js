@@ -8,7 +8,9 @@ if(args.v || args.version) {
     console.log(npmPackage.name + ' ' + npmPackage.version);
     process.stdout.write('Written by ');
     for(var i in npmPackage.contributors) {
-        process.stdout.write(npmPackage.contributors[i].name + (i < npmPackage.contributors.length - 1 ? ',' : '\n'));
+        if(npmPackage.contributors.hasOwnProperty(i)) {
+            process.stdout.write(npmPackage.contributors[i].name + (i < npmPackage.contributors.length - 1 ? ',' : '\n'));
+        }
     }
     process.exit();
 }
@@ -36,13 +38,13 @@ if(cluster.isMaster && clustered) {
     var workersOnline = 0;
     var stopFork = false;
     
-    cluster.on('online', function(worker) {
-        if(++workersOnline == numberOfWorkers) {
+    cluster.on('online', function() {
+        if(++workersOnline === numberOfWorkers) {
             library.makeInfo('All workers are now online');
         }
     });
     
-    cluster.on('exit', function(worker, code, signal) {
+    cluster.on('exit', function(worker, code) {
         if(code > 0) { // Restart the worker on an error
             library.makeWarning('Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
             cluster.fork();
