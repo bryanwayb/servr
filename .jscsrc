@@ -86,7 +86,6 @@
     ],
     "validateAlignedFunctionParameters": true,
     "validateIndentation": 4,
-    "validateLineBreaks": "LF",
     "validateParameterSeparator": ", ",
     "validateQuoteMarks": "'",
     "requireSpaceBetweenArguments": true,
