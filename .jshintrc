@@ -7,5 +7,10 @@
     "noarg": true,
     "nonbsp": true,
     "nonew": true,
-    "unused": true
+    "unused": true,
+    "node": true,
+    "strict": true,
+    "undef": true,
+    "eqnull": true,
+    "futurehostile": true
 }

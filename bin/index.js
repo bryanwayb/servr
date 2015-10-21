@@ -1,3 +1,5 @@
+'use strict';
+
 var cluster = require('cluster'),
     library = require('../lib/functions.js');
 
@@ -95,7 +97,7 @@ else {
     var config;
     for(var i = 0; i < externalConfigurations.length; i++) {
         try {
-            if(config === undefined) {
+            if(config == null) {
                 config = loadConfig(externalConfigurations[i]);
             }
             else {
@@ -107,10 +109,10 @@ else {
         }
     }
 
-    if(config !== undefined) {
+    if(config != null) {
         library.mergeObjects(config, defaultConfiguration);
     }
-    else if(defaultConfiguration !== undefined) {
+    else if(defaultConfiguration != null) {
         library.makeInfo('Using only default configuraiton');
         config = defaultConfiguration;
     }

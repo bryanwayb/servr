@@ -1,3 +1,5 @@
+'use strict';
+
 var jshint = require('jshint').JSHINT,
     fs = require('fs'),
     path = require('path'),
