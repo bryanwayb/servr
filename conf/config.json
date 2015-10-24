@@ -8,6 +8,19 @@
                     "options": "*",
                     "default": [ "index.jshtml", "index.html", "default.html" ]
                 }
+            },
+            "cache": {
+                "stat": true,
+                "files": true,
+                "handlers": true,
+                "directoryDefaults": true,
+                "urlMap": true 
+            },
+            "extensions": {
+                "compression": {
+                    "static": true,
+                    "dynamic": true
+                }
             }
         },
         "*:8080": "*:80"
