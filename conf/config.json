@@ -21,7 +21,8 @@
                     {
                         "regex": "^rewrite\/test$",
                         "options": "i",
-                        "replace": "${USERAGENT}"
+                        "replace": "",
+                        "condition": "${USERAGENT}.indexOf('Trident') !== -1"
                     }
                 ],
                 "compression": {
