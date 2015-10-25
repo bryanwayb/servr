@@ -26,8 +26,8 @@
                     }
                 ],
                 "compression": {
-                    "static": true,
-                    "dynamic": true
+                    "gzip": true,
+                    "deflat": true
                 }
             }
         },
