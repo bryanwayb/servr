@@ -26,8 +26,9 @@
                     }
                 ],
                 "compression": {
+                    "identity": true,
                     "gzip": true,
-                    "deflat": true
+                    "deflate": true
                 }
             }
         },
