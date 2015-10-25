@@ -17,6 +17,13 @@
                 "urlMap": true 
             },
             "extensions": {
+                "rewrite": [
+                    {
+                        "regex": "^rewrite\/test$",
+                        "options": "i",
+                        "replace": "${USERAGENT}"
+                    }
+                ],
                 "compression": {
                     "static": true,
                     "dynamic": true
