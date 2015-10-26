@@ -54,7 +54,7 @@ function recursiveCheckDirectory(dir) {
                 totalErrorsInFiles += totalErrors;
 
                 var printColor = success ? colors.green : colors.red;
-                console.log(printColor('[' + (success ? 'PASS' : 'FAIL') + '] ') + pathname);
+                console.log(printColor('[' + (success ? 'PASS' : 'FAIL') + '] ') + path.relative(process.cwd(), pathname));
 
                 totalFiles++;
                 if(!success || jscsFixableErrors > 0) {
