@@ -33,7 +33,7 @@
             },
             "hosts": {
                 "127.0.0.1": {
-                    "directories": {
+                    "!directories": {
                         "/": {
                             "root": "../www/submap",
                             "options": "*",
