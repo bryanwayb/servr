@@ -1,5 +1,5 @@
 {
-    "hosts": {
+    "bindings": {
         "*:80" : {
             "protocol": "http",
             "directories": {
@@ -14,7 +14,7 @@
                 "files": true,
                 "handlers": true,
                 "directoryDefaults": true,
-                "urlMap": true 
+                "urlMap": true
             },
             "extensions": {
                 "rewrite": [
@@ -29,6 +29,17 @@
                     "identity": true,
                     "gzip": true,
                     "deflate": true
+                }
+            },
+            "hosts": {
+                "127.0.0.1": {
+                    "directories": {
+                        "/": {
+                            "root": "../www/submap",
+                            "options": "*",
+                            "default": [ "index.jshtml", "index.html", "default.html" ]
+                        }
+                    }
                 }
             }
         },

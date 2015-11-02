@@ -39,9 +39,9 @@ function resolveConfigAlias(config, entry) {
 function loadConfig(path) {
     var config = require(path);
 
-    for(var property in config.hosts) {
-        if(config.hosts.hasOwnProperty(property)) {
-            config.hosts[property] = resolveConfigAlias(config.hosts, config.hosts[property]);
+    for(var property in config.bindings) {
+        if(config.bindings.hasOwnProperty(property)) {
+            config.bindings[property] = resolveConfigAlias(config.bindings, config.bindings[property]);
         }
     }
 

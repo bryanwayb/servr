@@ -1,5 +1,5 @@
 {
-    "hosts": {
+    "bindings": {
         "*:80" : {
             "protocol": "http",
             "directories": {
