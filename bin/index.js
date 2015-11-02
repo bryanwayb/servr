@@ -1,7 +1,9 @@
 'use strict';
 
 var cluster = require('cluster'),
-    library = require('../lib/functions.js');
+    library = require('../lib/functions.js'),
+    logger = require('../lib/logger.js'),
+    enums = require('../lib/enums.js');
 
 var args = require('minimist')(process.argv.slice(2));
 
@@ -61,13 +63,13 @@ if(cluster.isMaster && clustered) {
 
     cluster.on('online', function() {
         if(++workersOnline === numberOfWorkers) {
-            library.makeInfo('All workers are now online');
+            logger.log(enums.LogType.Info, 'All workers are now online');
         }
     });
 
     cluster.on('exit', function(worker, code) {
         if(code > 0) { // Restart the worker on an error
-            library.makeWarning('Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
+            logger.log(enums.LogType.Warning, 'Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
             cluster.fork();
         }
     });
@@ -88,7 +90,7 @@ else {
             defaultConfiguration = loadConfig('../conf/config.json');
         }
         catch(e) {
-            library.makeWarning('Continuing without loading a default configuration');
+            logger.log(enums.LogType.Warning, 'Continuing without loading a default configuration');
             defaultConfiguration = { };
         }
     }
@@ -105,7 +107,7 @@ else {
             }
         }
         catch(e) {
-            library.makeError('Unable to load configuration file: \'' + externalConfigurations[i] + '\'', 1);
+            logger.log(enums.LogType.Fatal, 'Unable to load configuration file: \'' + externalConfigurations[i] + '\'', e);
         }
     }
 
@@ -113,14 +115,14 @@ else {
         library.mergeObjects(config, defaultConfiguration);
     }
     else if(defaultConfiguration != null) {
-        library.makeInfo('Using only default configuraiton');
+        logger.log(enums.LogType.Info, 'Using only default configuraiton');
         config = defaultConfiguration;
     }
     else {
-        library.makeError('No configuration file has been loaded.', 1);
+        logger.log(enums.LogType.Fatal, 'No configuration file has been loaded.');
     }
 
-    library.makeInfo('Starting...');
+    logger.log(enums.LogType.Info, 'Starting...');
     nodelite.ServerPool(config).start();
-    library.makeInfo('Server has been started');
+    logger.log(enums.LogType.Info, 'Server has been started');
 }
