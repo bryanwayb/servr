@@ -19,7 +19,7 @@
             "extensions": {
                 "rewrite": [
                     {
-                        "regex": "^rewrite\/test$",
+                        "regex": "^\/rewrite\/test$",
                         "options": "i",
                         "replace": "",
                         "condition": "${USERAGENT}.indexOf('Trident') !== -1"
