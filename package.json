@@ -1,10 +1,10 @@
 {
   "name": "servr",
-  "version": "0.1.1-alpha.1",
+  "version": "0.1.1",
   "description": "A HTTP server with its focus on speed",
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
   "bin": {
-      "servr": "bin/index.js"
+      "servr": "./bin/servr"
   },
   "dependencies": {
     "js-html": "^0.2.2",
@@ -12,9 +12,9 @@
     "colors": "^1.1.2"
   },
   "scripts": {
-    "start": "node bin/index.js -l",
-    "test": "node test/check.js",
-    "fix": "node test/check.js --fix"
+    "start": "node ./bin/index.js -l",
+    "test": "node ./test/check.js",
+    "fix": "node ./test/check.js --fix"
   },
   "keywords": [
       "servr",
