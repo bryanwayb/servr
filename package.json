@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "js-html": "^0.2.2",
-    "minimist": "^1.1.1"
+    "minimist": "^1.1.1",
+    "colors": "^1.1.2"
   },
   "scripts": {
     "start": "node bin/index.js -l",
@@ -39,7 +40,6 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "colors": "^1.1.2",
     "jscs": "^2.3.4",
     "jshint": "^2.8.0"
   }
