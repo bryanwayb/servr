@@ -2,7 +2,7 @@
 
 var cluster = require('cluster'),
     fs = require('fs'),
-    library = require('../lib/functions.js'),
+    /*library = require('../lib/functions.js'),*/
     logger = require('../lib/logger.js'),
     enums = require('../lib/enums.js'),
     helpout = require('helpout'),
@@ -28,6 +28,7 @@ if(cluster.isMaster) {
                         '-c, --config <file>': 'Uses the given configuration file. When more than one configuration file is specified, they are merged in order of occurance.',
                         '-l, --log <file>': 'Outputs log entries to the given file path instead of to stdout.',
                         '--log-level <level>': 'Only log events greater-than or equal to given level. 0=Info, 1=Warning, 2=Error, 3=Fatal Error.',
+                        '--disable-color': 'When using stdout, disables enchanced text modes',
                         '-v, --version': 'Prints version information in output header.',
                         '-h, --help': 'Displays this help inforamtion.'
                     }
@@ -52,6 +53,8 @@ if(cluster.isMaster) {
         }
     }
 
+    logger.useColor = !args['disable-color'];
+
     var logLevel = args['log-level'];
     if(logLevel && (logLevel === true || isNaN(logLevel))) {
         logLevel = 0;
@@ -63,13 +66,18 @@ if(cluster.isMaster) {
     if(logFile && typeof logFile === 'string') {
         try {
             loggingStream = fs.createWriteStream(logFile);
+            logger.useColor = false;
         }
         catch(ex) {
-            logger.log(enums.LogType.Error, 'Unable to open log file stream for ' + logFile, ex);
+            logger.log(enums.LogType.Error, 'Unable to open log file stream for ' + logFile + '. Using stdout instead.', ex);
         }
     }
 
-    logger.stream = loggingStream || process.stdout;
+    if(!loggingStream && process.stdout.isTTY) {
+        loggingStream = process.stdout;
+    }
+
+    logger.stream = loggingStream;
 }
 else {
     configuration = process.env[enums.EnvironmentVar.Configuration];
@@ -79,12 +87,23 @@ if(clusterInstanceCount) {
     var workerEnv = { };
     workerEnv[enums.EnvironmentVar.Configuration] = configuration;
 
+    cluster.on('message', logger.workerMessage);
+
+    cluster.on('exit', function(worker, code) {
+        if(code === 0) {
+            logger.log(enums.LogType.Info, 'Worker ' + worker.process.pid + ' has shutdown');
+        }
+        else {
+            logger.log(enums.LogType.Warning, 'Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
+        }
+    });
+
     for(var i = 0; i < clusterInstanceCount; i++) {
         cluster.fork(workerEnv);
     }
 }
 else {
-    // TODO: Start server
+    logger.log(enums.LogType.Info, 'Just a test');
 }
 
 /*function resolveConfigAlias(config, entry) {
