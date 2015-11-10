@@ -1,37 +1,93 @@
 'use strict';
 
 var cluster = require('cluster'),
+    fs = require('fs'),
     library = require('../lib/functions.js'),
     logger = require('../lib/logger.js'),
-    enums = require('../lib/enums.js');
+    enums = require('../lib/enums.js'),
+    helpout = require('helpout'),
+    npmPackage = require('../package.json');
 
 var args = require('minimist')(process.argv.slice(2));
 
-if(args.v || args.version) {
-    var npmPackage = require('../package.json');
-    console.log(npmPackage.name + ' ' + npmPackage.version);
-    process.stdout.write('Written by ');
-    for(var i in npmPackage.contributors) {
-        if(npmPackage.contributors.hasOwnProperty(i)) {
-            process.stdout.write(npmPackage.contributors[i].name + (i < npmPackage.contributors.length - 1 ? ',' : '\n'));
+var clusterInstanceCount,
+    configuration;
+
+if(cluster.isMaster) {
+    if(args.v || args.version) {
+        process.stdout.write(helpout.version(npmPackage));
+    }
+
+    if(args.h || args.help) {
+        process.stdout.write(helpout.help({
+            npmPackage: npmPackage,
+            usage: '[options]',
+            sections: {
+                BASIC: {
+                    options: {
+                        '-c, --config <file>': 'Uses the given configuration file. When more than one configuration file is specified, they are merged in order of occurance.',
+                        '-l, --log <file>': 'Outputs log entries to the given file path instead of to stdout.',
+                        '--log-level <level>': 'Only log events greater-than or equal to given level. 0=Info, 1=Warning, 2=Error, 3=Fatal Error.',
+                        '-v, --version': 'Prints version information in output header.',
+                        '-h, --help': 'Displays this help inforamtion.'
+                    }
+                },
+                CLUSTERING: {
+                    options: {
+                        '-u, --cluster [instance count]': 'Enable cluster workers for multi-CPU utilization. The instance count defaults to the number of CPU cores plus one'
+                    }
+                }
+            }
+        }));
+        process.exit();
+    }
+
+    clusterInstanceCount = args.u || args.cluster;
+    if(clusterInstanceCount) {
+        if(clusterInstanceCount === true || isNaN(clusterInstanceCount)) {
+            clusterInstanceCount = require('os').cpus().length + 1;
+        }
+        else if(clusterInstanceCount <= 0) {
+            clusterInstanceCount = false;
         }
     }
-    process.exit();
+
+    var logLevel = args['log-level'];
+    if(logLevel && (logLevel === true || isNaN(logLevel))) {
+        logLevel = 0;
+    }
+    logger.level = logLevel;
+
+    var logFile = args.l || args.log,
+        loggingStream;
+    if(logFile && typeof logFile === 'string') {
+        try {
+            loggingStream = fs.createWriteStream(logFile);
+        }
+        catch(ex) {
+            logger.log(enums.LogType.Error, 'Unable to open log file stream for ' + logFile, ex);
+        }
+    }
+
+    logger.stream = loggingStream || process.stdout;
 }
-if(args.h || args.help) {
-    var npmPackage = require('../package.json');
-    console.log('Usage: ' + npmPackage.name + ' [options]');
-    console.log('\nOptions:\n' +
-        '  -c, --config [config file]   Uses the configuration file specified.\n' +
-        '  --no-default                 Disable loading of the default configuration\n' +
-        '  -v, --version                Print version information and exit\n' +
-        '  -h, --help                   Prints this help information\n' +
-        '  --instances [number]         Number of childs to create. Default is CPU count\n' +
-        '  -l, --cluster                Use worker processes; implied by --instances > 1');
-    process.exit();
+else {
+    configuration = process.env[enums.EnvironmentVar.Configuration];
 }
 
-function resolveConfigAlias(config, entry) {
+if(clusterInstanceCount) {
+    var workerEnv = { };
+    workerEnv[enums.EnvironmentVar.Configuration] = configuration;
+
+    for(var i = 0; i < clusterInstanceCount; i++) {
+        cluster.fork(workerEnv);
+    }
+}
+else {
+    // TODO: Start server
+}
+
+/*function resolveConfigAlias(config, entry) {
     if(typeof entry === 'string') {
         entry = resolveConfigAlias(config, config[entry]);
     }
@@ -125,4 +181,4 @@ else {
     logger.log(enums.LogType.Info, 'Starting...');
     nodelite.ServerPool(config).start();
     logger.log(enums.LogType.Info, 'Server has been started');
-}
+}*/

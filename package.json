@@ -1,15 +1,16 @@
 {
   "name": "servr",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A HTTP server with its focus on speed",
   "main": "./lib/index.js",
   "bin": {
-      "servr": "./bin/servr"
+    "servr": "./bin/servr"
   },
   "dependencies": {
+    "colors": "^1.1.2",
+    "helpout": "^0.1.2",
     "js-html": "^0.2.2",
-    "minimist": "^1.1.1",
-    "colors": "^1.1.2"
+    "minimist": "^1.1.1"
   },
   "scripts": {
     "start": "node ./bin/index.js -l",
@@ -17,11 +18,11 @@
     "fix": "node ./test/check.js --fix"
   },
   "keywords": [
-      "servr",
-      "web",
-      "server",
-      "http",
-      "html"
+    "servr",
+    "web",
+    "server",
+    "http",
+    "html"
   ],
   "contributors": [
     {
@@ -35,8 +36,8 @@
     "url": "https://github.com/bryanwayb/servr.git"
   },
   "bugs": {
-      "url": "https://github.com/bryanwayb/servr/issues",
-      "email" : "bryanwayb@gmail.com"
+    "url": "https://github.com/bryanwayb/servr/issues",
+    "email": "bryanwayb@gmail.com"
   },
   "license": "MIT",
   "devDependencies": {
