@@ -1,12 +1,15 @@
+#! /usr/bin/env node
 'use strict';
 
 var cluster = require('cluster'),
     fs = require('fs'),
-    /*library = require('../lib/functions.js'),*/
+    path = require('path'),
+    functions = require('../lib/functions.js'),
     logger = require('../lib/logger.js'),
     enums = require('../lib/enums.js'),
     helpout = require('helpout'),
-    npmPackage = require('../package.json');
+    npmPackage = require('../package.json'),
+    worker = require('./worker.js');
 
 var args = require('minimist')(process.argv.slice(2));
 
@@ -78,126 +81,76 @@ if(cluster.isMaster) {
     }
 
     logger.stream = loggingStream;
-}
-else {
-    configuration = process.env[enums.EnvironmentVar.Configuration];
-}
-
-if(clusterInstanceCount) {
-    var workerEnv = { };
-    workerEnv[enums.EnvironmentVar.Configuration] = configuration;
-
-    cluster.on('message', logger.workerMessage);
-
-    cluster.on('exit', function(worker, code) {
-        if(code === 0) {
-            logger.log(enums.LogType.Info, 'Worker ' + worker.process.pid + ' has shutdown');
-        }
-        else {
-            logger.log(enums.LogType.Warning, 'Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
-        }
-    });
-
-    for(var i = 0; i < clusterInstanceCount; i++) {
-        cluster.fork(workerEnv);
+    
+    var configurationFiles = [ ];
+    if(args.c) {
+        functions.buildFlatArray(configurationFiles, args.c);
     }
-}
-else {
-    logger.log(enums.LogType.Info, 'Just a test');
-}
-
-/*function resolveConfigAlias(config, entry) {
-    if(typeof entry === 'string') {
-        entry = resolveConfigAlias(config, config[entry]);
+    if(args.config) {
+        functions.buildFlatArray(configurationFiles, args.config);
     }
-    return entry;
-}
-
-function loadConfig(path) {
-    var config = require(path);
-
-    for(var property in config.bindings) {
-        if(config.bindings.hasOwnProperty(property)) {
-            config.bindings[property] = resolveConfigAlias(config.bindings, config.bindings[property]);
-        }
+    
+    var totalConfigurationFiles = configurationFiles.length; 
+    if(totalConfigurationFiles === 0) {
+        logger.log(enums.LogType.Fatal, 'No configuration files specified, unable to continue');
     }
-
-    return config;
-}
-
-var instances = args.instances;
-if(isNaN(instances)) {
-    instances = undefined;
-}
-var clustered = args.l || args.cluster || instances > 1;
-
-if(cluster.isMaster && clustered) {
-    var numberOfWorkers = instances || require('os').cpus().length;
-    var workersOnline = 0;
-    var stopFork = false;
-
-    cluster.on('online', function() {
-        if(++workersOnline === numberOfWorkers) {
-            logger.log(enums.LogType.Info, 'All workers are now online');
-        }
-    });
-
-    cluster.on('exit', function(worker, code) {
-        if(code > 0) { // Restart the worker on an error
-            logger.log(enums.LogType.Warning, 'Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
-            cluster.fork();
-        }
-    });
-
-    for(var i = 0; i < numberOfWorkers && !stopFork; i++) {
-        var env = {};
-        env[library.outputEnabledEnvironmentVariable] = i === 0;
-        cluster.fork(env);
-    }
-}
-else {
-    var nodelite = require('../lib/index.js');
-
-    // Try to load the default configuration file. If we're not able to for some reason, continue on with a warning.
-    var defaultConfiguration;
-    if(args.default !== false) {
+    
+    // Here we'll start loading/merging all the given configuration files into a single object
+    configuration = { };
+    var loadedConfigurationFiles = 0;
+    for(var configIndex = 0; configIndex < totalConfigurationFiles; configIndex++) {
+        var currentConfigFile = configurationFiles[configIndex];
         try {
-            defaultConfiguration = loadConfig('../conf/config.json');
+            var currentConfigObject = require(path.resolve(process.cwd(), currentConfigFile));
+            
+            for(var property in currentConfigObject.bindings) {
+                if(currentConfigObject.bindings.hasOwnProperty(property)) {
+                    var resolvedProprety = currentConfigObject.bindings[property];
+                    if(typeof resolvedProprety === 'string') {
+                        currentConfigObject.bindings[property] = currentConfigObject.bindings[resolvedProprety];
+                    }
+                }
+            }
+            
+            functions.mergeObjects(configuration, currentConfigObject);
+            
+            loadedConfigurationFiles++;
         }
-        catch(e) {
-            logger.log(enums.LogType.Warning, 'Continuing without loading a default configuration');
-            defaultConfiguration = { };
+        catch(ex) {
+            logger.log(enums.LogType.Error, 'Unable to load configuration file: ' + currentConfigFile, ex);
         }
     }
-
-    var externalConfigurations = library.buildFlatArray([ args.c, args.config ]);
-    var config;
-    for(var i = 0; i < externalConfigurations.length; i++) {
-        try {
-            if(config == null) {
-                config = loadConfig(externalConfigurations[i]);
+    
+    if(loadedConfigurationFiles === 0) {
+        logger.log(enums.LogType.Fatal, 'Unable to load any of the provided configuration files');
+    }
+    
+    if(clusterInstanceCount) {
+        cluster.on('message', logger.workerMessage);
+        
+        cluster.on('online', function(worker) {
+            functions.workerSendData(enums.WorkerMessages.Configuration, configuration, worker);
+        });
+    
+        cluster.on('exit', function(worker, code) { // TODO: Handle worker restarting when needed
+            if(code === 0) {
+                logger.log(enums.LogType.Info, 'Worker ' + worker.process.pid + ' has shutdown');
             }
             else {
-                library.mergeObjects(config, loadConfig(externalConfigurations[i]));
+                logger.log(enums.LogType.Warning, 'Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
             }
+        });
+    
+        for(var i = 0; i < clusterInstanceCount; i++) {
+            cluster.fork();
         }
-        catch(e) {
-            logger.log(enums.LogType.Fatal, 'Unable to load configuration file: \'' + externalConfigurations[i] + '\'', e);
-        }
-    }
-
-    if(config != null) {
-        library.mergeObjects(config, defaultConfiguration);
-    }
-    else if(defaultConfiguration != null) {
-        logger.log(enums.LogType.Info, 'Using only default configuraiton');
-        config = defaultConfiguration;
     }
     else {
-        logger.log(enums.LogType.Fatal, 'No configuration file has been loaded.');
+        worker(configuration);
     }
-
-    logger.log(enums.LogType.Info, 'Starting...');
-    nodelite.ServerPool(config).start();
-    logger.log(enums.LogType.Info, 'Server has been started');
-}*/
+}
+else {
+    functions.workerProcessData(enums.WorkerMessages.Configuration, function(configuration) {
+        worker(configuration);
+    });
+}

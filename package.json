@@ -4,7 +4,7 @@
   "description": "A HTTP server with its focus on speed",
   "main": "./lib/index.js",
   "bin": {
-    "servr": "./bin/servr"
+    "servr": "./bin/index.js"
   },
   "dependencies": {
     "colors": "^1.1.2",
