@@ -81,7 +81,7 @@ if(cluster.isMaster) {
     }
 
     logger.stream = loggingStream;
-    
+
     var configurationFiles = [ ];
     if(args.c) {
         functions.buildFlatArray(configurationFiles, args.c);
@@ -89,12 +89,12 @@ if(cluster.isMaster) {
     if(args.config) {
         functions.buildFlatArray(configurationFiles, args.config);
     }
-    
-    var totalConfigurationFiles = configurationFiles.length; 
+
+    var totalConfigurationFiles = configurationFiles.length;
     if(totalConfigurationFiles === 0) {
         logger.log(enums.LogType.Fatal, 'No configuration files specified, unable to continue');
     }
-    
+
     // Here we'll start loading/merging all the given configuration files into a single object
     configuration = { };
     var loadedConfigurationFiles = 0;
@@ -102,7 +102,7 @@ if(cluster.isMaster) {
         var currentConfigFile = configurationFiles[configIndex];
         try {
             var currentConfigObject = require(path.resolve(process.cwd(), currentConfigFile));
-            
+
             for(var property in currentConfigObject.bindings) {
                 if(currentConfigObject.bindings.hasOwnProperty(property)) {
                     var resolvedProprety = currentConfigObject.bindings[property];
@@ -111,27 +111,27 @@ if(cluster.isMaster) {
                     }
                 }
             }
-            
+
             functions.mergeObjects(configuration, currentConfigObject);
-            
+
             loadedConfigurationFiles++;
         }
         catch(ex) {
             logger.log(enums.LogType.Error, 'Unable to load configuration file: ' + currentConfigFile, ex);
         }
     }
-    
+
     if(loadedConfigurationFiles === 0) {
         logger.log(enums.LogType.Fatal, 'Unable to load any of the provided configuration files');
     }
-    
+
     if(clusterInstanceCount) {
         cluster.on('message', logger.workerMessage);
-        
+
         cluster.on('online', function(worker) {
             functions.workerSendData(enums.WorkerMessages.Configuration, configuration, worker);
         });
-    
+
         cluster.on('exit', function(worker, code) { // TODO: Handle worker restarting when needed
             if(code === 0) {
                 logger.log(enums.LogType.Info, 'Worker ' + worker.process.pid + ' has shutdown');
@@ -140,7 +140,7 @@ if(cluster.isMaster) {
                 logger.log(enums.LogType.Warning, 'Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
             }
         });
-    
+
         for(var i = 0; i < clusterInstanceCount; i++) {
             cluster.fork();
         }
