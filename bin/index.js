@@ -72,7 +72,7 @@ if(cluster.isMaster) {
             logger.useColor = false;
         }
         catch(ex) {
-            logger.log(enums.LogType.Error, 'Unable to open log file stream for ' + logFile + '. Using stdout instead.', ex);
+            logger.log(enums.LogType.Error, 'unable to open log file stream for ' + logFile + '. Using stdout instead.', ex);
         }
     }
 
@@ -92,7 +92,7 @@ if(cluster.isMaster) {
 
     var totalConfigurationFiles = configurationFiles.length;
     if(totalConfigurationFiles === 0) {
-        logger.log(enums.LogType.Fatal, 'No configuration files specified, unable to continue');
+        logger.log(enums.LogType.Fatal, 'no configuration files specified, unable to continue');
     }
 
     // Here we'll start loading/merging all the given configuration files into a single object
@@ -117,28 +117,34 @@ if(cluster.isMaster) {
             loadedConfigurationFiles++;
         }
         catch(ex) {
-            logger.log(enums.LogType.Error, 'Unable to load configuration file: ' + currentConfigFile, ex);
+            logger.log(enums.LogType.Error, 'unable to load configuration file: ' + currentConfigFile, ex);
         }
     }
 
     if(loadedConfigurationFiles === 0) {
-        logger.log(enums.LogType.Fatal, 'Unable to load any of the provided configuration files');
+        logger.log(enums.LogType.Fatal, 'unable to load any of the provided configuration files');
     }
 
     if(clusterInstanceCount) {
         cluster.on('message', logger.workerMessage);
 
+        var onlineCount = 0;
         cluster.on('online', function(worker) {
             functions.workerSendData(enums.WorkerMessages.Configuration, configuration, worker);
+            if(++onlineCount === clusterInstanceCount) {
+                logger.log(enums.LogType.Info, 'all workers running');
+            }
         });
 
-        cluster.on('exit', function(worker, code) { // TODO: Handle worker restarting when needed
+        cluster.on('exit', function(worker, code) {
             if(code === 0) {
-                logger.log(enums.LogType.Info, 'Worker ' + worker.process.pid + ' has shutdown');
+                logger.log(enums.LogType.Info, 'worker ' + worker.process.pid + ' has shutdown');
             }
             else {
-                logger.log(enums.LogType.Warning, 'Worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
+                logger.log(enums.LogType.Warning, 'worker ' + worker.process.pid + ' has exited unexpectedly, restarting');
+                cluster.fork();
             }
+            onlineCount--;
         });
 
         for(var i = 0; i < clusterInstanceCount; i++) {
